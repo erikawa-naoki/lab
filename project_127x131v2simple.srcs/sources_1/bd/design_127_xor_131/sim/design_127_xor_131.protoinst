@@ -1,0 +1,9 @@
+{
+	"version": "1.0",
+	"modules": {
+		"design_127_xor_131": {
+			"proto_instances": {
+			}
+		}
+	}
+}
