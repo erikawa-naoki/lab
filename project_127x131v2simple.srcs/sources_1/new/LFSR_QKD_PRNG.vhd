@@ -3,7 +3,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 
 
---Ÿ107x109_FSM!!
+--æ¬¡107x109_FSM!!
 
 
 entity LFSR_QKD_PRNG is
@@ -14,12 +14,15 @@ entity LFSR_QKD_PRNG is
     );
 
     Port ( 
-        o_RNG     : out STD_LOGIC;                      -- —”o—Íi1ƒrƒbƒgj
-        o_ref_clk : out STD_LOGIC;                      -- o—ÍƒNƒƒbƒNiŠî€—pj
-        o_ran     : out STD_LOGIC;                      -- —”o—Íi1ƒrƒbƒgj
-        enable    : in std_logic ;                       -- “®ì‹–‰ÂM†
-        clk       : in STD_LOGIC ;                       -- “ü—ÍƒNƒƒbƒNiFPGA“à•”ƒNƒƒbƒNj
-        reset     : in STD_LOGIC 
+        o_RNG     : out STD_LOGIC;                      -- ä¹±æ•°å‡ºåŠ›ï¼ˆ1ãƒ“ãƒƒãƒˆï¼‰
+        o_ref_clk : out STD_LOGIC;                      -- å‡ºåŠ›ã‚¯ãƒ­ãƒƒã‚¯ï¼ˆåŸºæº–ç”¨ï¼‰
+        o_ran     : out STD_LOGIC;                      -- ä¹±æ•°å‡ºåŠ›ï¼ˆ1ãƒ“ãƒƒãƒˆï¼‰
+        enable    : in std_logic ;                       -- å‹•ä½œè¨±å¯ä¿¡å·
+        clk       : in STD_LOGIC ;                       -- å…¥åŠ›ã‚¯ãƒ­ãƒƒã‚¯ï¼ˆFPGAå†…éƒ¨ã‚¯ãƒ­ãƒƒã‚¯ï¼‰
+        reset     : in STD_LOGIC ;
+        --è¿½åŠ 
+        o_bit1   : out integer;                        -- debug: bit1 index
+        o_bit2   : out integer                         -- debug: bit2 index
     );
 end LFSR_QKD_PRNG;
 --------------------------------------------------------------------
@@ -33,7 +36,7 @@ architecture Behavioral of LFSR_QKD_PRNG is
     signal ran               :std_logic;
     signal ran_reg           :std_logic := '0';
     -- =====================================================
-    -- ƒ‚ƒWƒ…ƒƒJƒEƒ“ƒ^io—ÍƒrƒbƒgˆÊ’u§Œäj
+    -- ãƒ¢ã‚¸ãƒ¥ãƒ­ã‚«ã‚¦ãƒ³ã‚¿ï¼ˆå‡ºåŠ›ãƒ“ãƒƒãƒˆä½ç½®åˆ¶å¾¡ï¼‰
     -- =====================================================
     signal bit1 : integer range 0 to N1-1 := 0;
     signal bit2 : integer range 0 to N2-1 := 0;
@@ -48,9 +51,9 @@ signal w_SELECT     : std_logic;
 begin
 
 
-  -- ‡Bstart
+  -- â‘¢start
 p_1MHZ : process (clk) --is
-  -- ‡B ƒNƒƒbƒN•ªüƒvƒƒZƒX ƒNƒƒbƒN‚ğ1MHz‚É•ªü LFSR“®ì‘¬“x‚ğ§Œä
+  -- â‘¢ ã‚¯ãƒ­ãƒƒã‚¯åˆ†å‘¨ãƒ—ãƒ­ã‚»ã‚¹ ã‚¯ãƒ­ãƒƒã‚¯ã‚’1MHzã«åˆ†å‘¨ LFSRå‹•ä½œé€Ÿåº¦ã‚’åˆ¶å¾¡
   begin
     if rising_edge(clk) then
       if r_CNT_1MHZ = c_CNT_1MHZ-1 then  -- -1, since counter starts at 0
@@ -70,7 +73,7 @@ p_1MHZ : process (clk) --is
     begin
         if (reset = '1') then
              count_1 <=  "00100110001001011000010000010101";-- 128
-             --‰Šú’l
+             --åˆæœŸå€¤
              count_2 <=  "110101111000100101111111100111011";-- 129
 
         elsif (rising_edge(r_TOGGLE_1MHZ)) then
@@ -82,7 +85,7 @@ p_1MHZ : process (clk) --is
         end if;
     end process;
     -- =====================================================
-    -- ƒ‚ƒWƒ…ƒƒJƒEƒ“ƒ^Fo—ÍƒrƒbƒgˆÊ’u‚ğ 0¨N¨0 ‚Å„‰ñ
+    -- ãƒ¢ã‚¸ãƒ¥ãƒ­ã‚«ã‚¦ãƒ³ã‚¿ï¼šå‡ºåŠ›ãƒ“ãƒƒãƒˆä½ç½®ã‚’ 0â†’Nâ†’0 ã§å·¡å›
     -- =====================================================
     process(clk, reset)
     begin
@@ -98,32 +101,34 @@ p_1MHZ : process (clk) --is
             end if;
         end if;
     end process;
-    --bit_idx©(bit_idx+1)modN
+    --bit_idxâ†(bit_idx+1)modN
 
     ran_reg <= count_1(bit1) xor count_2(bit2);
     o_ran <= ran_reg; 
-    w_SELECT <= r_TOGGLE_1MHZ; -- ‘—Mƒ^ƒCƒ~ƒ“ƒOv‚Å‚·Bí‚Éˆê’è‚ÌƒŠƒYƒ€‚Å High/Low ‚ğŒJ‚è•Ô‚µ‚Ü‚·
-    o_ref_clk <= w_SELECT and enable; -- ƒ^ƒCƒ~ƒ“ƒO“¯ŠúM†iƒNƒƒbƒNj‚ğo—Í
-    o_RNG <= ran_reg and w_SELECT and enable; -- QKD‘—M—p‚Ìƒpƒ‹ƒXM†
+    o_bit1 <= bit1;
+    o_bit2 <= bit2;
+    w_SELECT <= r_TOGGLE_1MHZ; -- é€ä¿¡ã‚¿ã‚¤ãƒŸãƒ³ã‚°ã€ã§ã™ã€‚å¸¸ã«ä¸€å®šã®ãƒªã‚ºãƒ ã§ High/Low ã‚’ç¹°ã‚Šè¿”ã—ã¾ã™
+    o_ref_clk <= w_SELECT and enable; -- ã‚¿ã‚¤ãƒŸãƒ³ã‚°åŒæœŸä¿¡å·ï¼ˆã‚¯ãƒ­ãƒƒã‚¯ï¼‰ã‚’å‡ºåŠ›
+    o_RNG <= ran_reg and w_SELECT and enable; -- QKDé€ä¿¡ç”¨ã®ãƒ‘ãƒ«ã‚¹ä¿¡å·
 
     --O_RNG
-    --—”‚ªu1v‚Ì‚Æ‚«‚¾‚¯AƒNƒƒbƒN‚É‡‚í‚¹‚Äƒpƒ‹ƒXiˆêu‚ÌHighj‚ªo‚Ü‚·B
-    --—”‚ªu0v‚È‚çA‚¸‚Á‚ÆLow‚Ì‚Ü‚Ü‚Å‚·B
+    --ä¹±æ•°ãŒã€Œ1ã€ã®ã¨ãã ã‘ã€ã‚¯ãƒ­ãƒƒã‚¯ã«åˆã‚ã›ã¦ãƒ‘ãƒ«ã‚¹ï¼ˆä¸€ç¬ã®Highï¼‰ãŒå‡ºã¾ã™ã€‚
+    --ä¹±æ•°ãŒã€Œ0ã€ãªã‚‰ã€ãšã£ã¨Lowã®ã¾ã¾ã§ã™ã€‚
 
 --                   __    __    __    __    __ 
--- o_ref_clk (Šî€) |  |__|  |__|  |__|  |__|  |__  <-- ‡@‚±‚Ì—§‚¿ã‚ª‚è‚ÅB‰eI
--- (ƒgƒŠƒK[)       ª     ª     ª     ª     ª
+-- o_ref_clk (åŸºæº–) |  |__|  |__|  |__|  |__|  |__  <-- â‘ ã“ã®ç«‹ã¡ä¸ŠãŒã‚Šã§æ’®å½±ï¼
+-- (ãƒˆãƒªã‚¬ãƒ¼)       â†‘     â†‘     â†‘     â†‘     â†‘
 
 --                   ___________             _____
--- ran_reg (—”’l) |     1     |_____0_____|  1  | <-- ‡A‚±‚Ì’l‚ğ‹L˜^
+-- ran_reg (ä¹±æ•°å€¤) |     1     |_____0_____|  1  | <-- â‘¡ã“ã®å€¤ã‚’è¨˜éŒ²
 -- (o_ran)
 
 --                   __                      __
--- o_RNG (ƒpƒ‹ƒX)   |  |________|___________|  |__  <-- (Ql)ƒŒ[ƒU[‚Í‚±‚¤Œõ‚é
--- (—”‚ª1‚Ì‚¾‚¯High)
+-- o_RNG (ãƒ‘ãƒ«ã‚¹)   |  |________|___________|  |__  <-- (å‚è€ƒ)ãƒ¬ãƒ¼ã‚¶ãƒ¼ã¯ã“ã†å…‰ã‚‹
+-- (ä¹±æ•°ãŒ1ã®æ™‚ã ã‘High)
 
 -- --------------------------------------------------
--- data.txt ‚Ì’†g   1     1     0     0     1
+-- data.txt ã®ä¸­èº«   1     1     0     0     1
 
 
 end Behavioral;
