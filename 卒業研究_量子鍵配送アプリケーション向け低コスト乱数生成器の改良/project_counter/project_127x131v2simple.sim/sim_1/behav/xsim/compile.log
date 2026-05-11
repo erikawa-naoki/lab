@@ -1,0 +1,4 @@
+INFO: [VRFC 10-163] Analyzing VHDL file "C:/Users/naoki/vivado/project_113x127_FSM/project_127x131v2simple.srcs/sources_1/new/LFSR_QKD_PRNG.vhd" into library xil_defaultlib
+INFO: [VRFC 10-3107] analyzing entity 'LFSR_QKD_PRNG'
+INFO: [VRFC 10-163] Analyzing VHDL file "C:/Users/naoki/vivado/project_113x127_FSM/project_127x131v2simple.srcs/sim_1/new/test_noise.vhd" into library xil_defaultlib
+INFO: [VRFC 10-3107] analyzing entity 'test_noise'
